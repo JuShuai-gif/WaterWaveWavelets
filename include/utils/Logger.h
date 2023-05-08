@@ -8,6 +8,7 @@
 #include <memory>
 
 namespace Utils{
+    // 日志等级
     enum LogLevel{
         DEBUG = 0,
         INFO,
@@ -194,6 +195,7 @@ namespace Utils{
 	#define LOG_INFO Utils::LogStream(&Utils::logger, Utils::LogLevel::INFO)
 	#define LOG_WARN Utils::LogStream(&Utils::logger, Utils::LogLevel::WARN)
 	#define LOG_ERR Utils::LogStream(&Utils::logger, Utils::LogLevel::ERR)
+    // 声明一下该类中的变量
 	#define INIT_LOGGING Utils::Logger Utils::logger;
 
 }

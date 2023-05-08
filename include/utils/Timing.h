@@ -95,7 +95,10 @@ namespace Utils{
                 double t = elapsed_seconds.count() * 1000.0f;
 
                 if(print)
+                {
                     LOG_INFO << "time " << h.name.c_str() << ": " << t << "ms";
+                    std::cout << "time " << h.name.c_str() << ": " << t << "ms";
+                }
                 return t;
             }
             return 0;
