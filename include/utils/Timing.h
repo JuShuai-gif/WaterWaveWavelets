@@ -8,36 +8,33 @@
 
 namespace Utils{
 	#define START_TIMING(timerName) \
-	Utilities::Timing::startTiming(timerName);
+	Utils::Timing::startTiming(timerName);
 
 	#define STOP_TIMING \
-	Utilities::Timing::stopTiming(false);
+	Utils::Timing::stopTiming(false);
 
 	#define STOP_TIMING_PRINT \
-	Utilities::Timing::stopTiming(true);
+	Utils::Timing::stopTiming(true);
 
 	#define STOP_TIMING_AVG \
 	{ \
 	static int timing_timerId = -1; \
-	Utilities::Timing::stopTiming(false, timing_timerId); \
+	Utils::Timing::stopTiming(false, timing_timerId); \
 	}
 
 	#define STOP_TIMING_AVG_PRINT \
 	{ \
 	static int timing_timerId = -1; \
-	Utilities::Timing::stopTiming(true, timing_timerId); \
+	Utils::Timing::stopTiming(true, timing_timerId); \
 	}
 
 	#define INIT_TIMING \
-		int Utilities::IDFactory::id = 0; \
-		std::unordered_map<int, Utilities::AverageTime> Utilities::Timing::m_averageTimes; \
-		std::stack<Utilities::TimingHelper> Utilities::Timing::m_timingStack; \
-		bool Utilities::Timing::m_dontPrintTimes = false; \
-		unsigned int Utilities::Timing::m_startCounter = 0; \
-		unsigned int Utilities::Timing::m_stopCounter = 0;
-
-    
-    
+		int Utils::IDFactory::id=0; \
+		std::unordered_map<int, Utils::AverageTime> Utils::Timing::m_averageTimes; \
+		std::stack<Utils::TimingHelper> Utils::Timing::m_timingStack; \
+		bool Utils::Timing::m_dontPrintTimes=false; \
+		unsigned int Utils::Timing::m_startCounter=0; \
+		unsigned int Utils::Timing::m_stopCounter=0;
 
     struct TimingHelper
     {
@@ -79,7 +76,7 @@ namespace Utils{
             m_stopCounter = 0;
         }
 
-        FORCE_INLINE static void startIming(const std::string& name=std::string("")){
+        FORCE_INLINE static void startTiming(const std::string& name=std::string("")){
             TimingHelper h;
             h.start = std::chrono::high_resolution_clock::now();
             h.name = name;

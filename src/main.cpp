@@ -2,12 +2,21 @@
 #include "../include/Integration.h"
 #include "../include/ArrayAlgebra.h"
 #include "utils/StringTools.h"
+#include "utils/Timing.h"
+#include "Test.h"
+
 int main() {
-	std::vector<std::string> tokens;
-	Utils::StringTools::tokenize("hello, world!", tokens, ", ");
-	for ( auto& it:tokens)
+
+	int N = 1<<10;
+	std::vector<int> v;
+	Utils::Timing::printAverageTimes();
+	START_TIMING("myTimer");
+
+
+	for (int i = 0; i < N; i++)
 	{
-		std::cout << it << std::endl;
+		v.push_back(i);
 	}
+	std::cout << Test::getID() << std::endl;
 	return 0;
 }
