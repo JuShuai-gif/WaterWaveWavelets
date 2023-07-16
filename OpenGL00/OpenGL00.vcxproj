@@ -118,6 +118,8 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -142,6 +144,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="data\island_data.cpp" />
     <ClCompile Include="imgui\imgui.cpp" />
     <ClCompile Include="imgui\imgui_demo.cpp" />
     <ClCompile Include="imgui\imgui_draw.cpp" />
@@ -151,6 +154,8 @@
     <ClCompile Include="imgui\imgui_widgets.cpp" />
     <ClCompile Include="Linking\include\glm\detail\glm.cpp" />
     <ClCompile Include="src\glad.c" />
+    <ClCompile Include="src\Grid.cpp" />
+    <ClCompile Include="src\Spectrum.cpp" />
     <ClCompile Include="src\test.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -166,12 +171,19 @@
     <ClInclude Include="include\ArrayAlgebra.h" />
     <ClInclude Include="include\camera.h" />
     <ClInclude Include="include\DomainInterpolation.h" />
+    <ClInclude Include="include\Enviroment.h" />
+    <ClInclude Include="include\Global.h" />
+    <ClInclude Include="include\Grid.h" />
     <ClInclude Include="include\Integration.h" />
     <ClInclude Include="include\Interpolation.h" />
     <ClInclude Include="include\Math.h" />
     <ClInclude Include="include\meta_utils.h" />
+    <ClInclude Include="include\ProfileBuffer.h" />
     <ClInclude Include="include\shader.h" />
+    <ClInclude Include="include\SimulationLoop.h" />
+    <ClInclude Include="include\Spectrum.h" />
     <ClInclude Include="include\ValueTraits.h" />
+    <ClInclude Include="include\WaveGrid.h" />
     <ClInclude Include="Linking\include\glad\glad.h" />
     <ClInclude Include="Linking\include\GLFW\glfw3.h" />
     <ClInclude Include="Linking\include\GLFW\glfw3native.h" />

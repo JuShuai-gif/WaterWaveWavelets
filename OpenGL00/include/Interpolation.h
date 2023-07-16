@@ -22,6 +22,7 @@ auto InterpolateNthArgument = [](auto fun, auto interpolation) {
     };
 };
 
+// 将传入的可调用对象fun 的参数按照给定的插值对象逐维进行插值处理，生成一个新的可调用对象并返回
 template <int I, class Fun, class... Interpolation>
 auto InterpolationDimWise_impl(Fun fun, Interpolation... interpolation) {
 
@@ -75,6 +76,7 @@ auto ConstantInterpolation = [](auto fun) {
     };
 };
 
+// 实现了一维线性插值的逻辑，根据传入的函数对象 fun 和输入参数 x 的位置，在 ix 和 ix+1 两个点之间进行加权插值计算，并返回结果。
 auto LinearInterpolation = [](auto fun) {
     // The first two lines are here because Eigen types do
     using ValueType = std::remove_reference_t<decltype(fun(0))>;

@@ -45,6 +45,15 @@
     <ClCompile Include="src\test.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="data\island_data.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Grid.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Spectrum.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Linking\include\glad\glad.h">
@@ -938,7 +947,31 @@
     <ClInclude Include="imgui\imstb_truetype.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="include\ArrayAlgebra.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Spectrum.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ProfileBuffer.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
     <ClInclude Include="include\Math.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Interpolation.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Integration.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Grid.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Global.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="include\DomainInterpolation.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="include\ValueTraits.h">
@@ -947,16 +980,13 @@
     <ClInclude Include="include\meta_utils.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="include\Interpolation.h">
+    <ClInclude Include="include\Enviroment.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="include\DomainInterpolation.h">
+    <ClInclude Include="include\WaveGrid.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="include\ArrayAlgebra.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Integration.h">
+    <ClInclude Include="include\SimulationLoop.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

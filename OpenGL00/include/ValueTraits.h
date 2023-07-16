@@ -13,4 +13,3 @@ template <class T> struct ValueTraits {
         }
     }
 };
-

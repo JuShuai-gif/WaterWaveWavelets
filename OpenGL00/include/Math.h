@@ -1,15 +1,9 @@
 #pragma once
 
-#include <eigen/Eigen/Dense>
+#include "ArrayAlgebra.h"
+#include "Integration.h"
 
-template <class T> struct ValueTraits {
+#include "DomainInterpolation.h"
+#include "Interpolation.h"
 
-    static constexpr T zero() {
-        if constexpr (std::is_base_of_v<Eigen::DenseBase<T>, T>) {
-            return T::Zero();
-        }
-        else {
-            return 0;
-        }
-    }
-};
+constexpr int pos_modulo(int n, int d) { return (n % d + d) % d; }
