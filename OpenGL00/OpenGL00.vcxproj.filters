@@ -42,9 +42,6 @@
     <ClCompile Include="imgui\imgui_widgets.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="src\test.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="data\island_data.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
@@ -52,6 +49,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="src\Spectrum.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\main.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
@@ -987,6 +987,12 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="include\SimulationLoop.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="include\DirectionNumber.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="include\PlaneMesh.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

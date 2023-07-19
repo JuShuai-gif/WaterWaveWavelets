@@ -155,8 +155,8 @@
     <ClCompile Include="Linking\include\glm\detail\glm.cpp" />
     <ClCompile Include="src\glad.c" />
     <ClCompile Include="src\Grid.cpp" />
+    <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Spectrum.cpp" />
-    <ClCompile Include="src\test.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="imgui\imconfig.h" />
@@ -170,6 +170,7 @@
     <ClInclude Include="imgui\imstb_truetype.h" />
     <ClInclude Include="include\ArrayAlgebra.h" />
     <ClInclude Include="include\camera.h" />
+    <ClInclude Include="include\DirectionNumber.h" />
     <ClInclude Include="include\DomainInterpolation.h" />
     <ClInclude Include="include\Enviroment.h" />
     <ClInclude Include="include\Global.h" />
@@ -178,6 +179,7 @@
     <ClInclude Include="include\Interpolation.h" />
     <ClInclude Include="include\Math.h" />
     <ClInclude Include="include\meta_utils.h" />
+    <ClInclude Include="include\PlaneMesh.h" />
     <ClInclude Include="include\ProfileBuffer.h" />
     <ClInclude Include="include\shader.h" />
     <ClInclude Include="include\SimulationLoop.h" />
