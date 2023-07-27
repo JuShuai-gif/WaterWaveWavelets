@@ -51,7 +51,7 @@
     <ClCompile Include="src\Spectrum.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="src\main.cpp">
+    <ClCompile Include="src\test.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
@@ -995,6 +995,9 @@
     <ClInclude Include="include\PlaneMesh.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="include\Utils.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Linking\include\glm\detail\func_common.inl">
@@ -1405,9 +1408,5 @@
     <None Include="Linking\include\glm\gtx\wrap.inl">
       <Filter>头文件</Filter>
     </None>
-    <None Include="Shaders\materials.vs" />
-    <None Include="Shaders\materials.fs" />
-    <None Include="Shaders\light_cube.vs" />
-    <None Include="Shaders\light_cube.fs" />
   </ItemGroup>
 </Project>

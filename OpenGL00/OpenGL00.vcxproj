@@ -155,8 +155,8 @@
     <ClCompile Include="Linking\include\glm\detail\glm.cpp" />
     <ClCompile Include="src\glad.c" />
     <ClCompile Include="src\Grid.cpp" />
-    <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Spectrum.cpp" />
+    <ClCompile Include="src\test.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="imgui\imconfig.h" />
@@ -184,6 +184,7 @@
     <ClInclude Include="include\shader.h" />
     <ClInclude Include="include\SimulationLoop.h" />
     <ClInclude Include="include\Spectrum.h" />
+    <ClInclude Include="include\Utils.h" />
     <ClInclude Include="include\ValueTraits.h" />
     <ClInclude Include="include\WaveGrid.h" />
     <ClInclude Include="Linking\include\glad\glad.h" />
@@ -610,10 +611,6 @@
     <None Include="Linking\include\glm\gtx\vector_angle.inl" />
     <None Include="Linking\include\glm\gtx\vector_query.inl" />
     <None Include="Linking\include\glm\gtx\wrap.inl" />
-    <None Include="Shaders\light_cube.fs" />
-    <None Include="Shaders\light_cube.vs" />
-    <None Include="Shaders\materials.fs" />
-    <None Include="Shaders\materials.vs" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

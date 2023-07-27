@@ -101,7 +101,7 @@ namespace WaterWavelets
 				return x * x * (2 * abs(x) - 3) + 1;
 		}
 
-	private:
+	public:
 		// 周期
 		float m_period;
 		// 数据

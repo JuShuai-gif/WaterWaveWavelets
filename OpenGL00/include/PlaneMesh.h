@@ -2,15 +2,23 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
-#include <vector>
-#include <array>
-#include "../include/ProfileBuffer.h"
-#include "../include/DirectionNumber.h"
+#include <glm/gtc/matrix_transform.hpp>
 
-struct VertexData {
-	std::vector<glm::vec3> positions;
-	std::vector<glm::vec3> normals;
-	std::vector<glm::vec4> colors;
+#include <string>
+#include <vector>
+#include "shader.h"
+
+#include "ProfileBuffer.h"
+#include "DirectionNumber.h"
+#include "Utils.h"
+
+struct Vertex {
+	// position
+	glm::vec3 Position;
+	// normal
+	glm::vec3 Normal;
+
+
 };
 
 
@@ -19,22 +27,26 @@ class PlaneMesh
 public:
 	
 	PlaneMesh(int nx,int ny) {
+		std::vector<glm::vec3> pos;
 		float dx = 2.0f / nx;
 		float dy = 2.0f / ny;
 
-		_data.positions.clear();
-		_data.normals.clear();
-		_data.colors.clear();
+		vertices.clear();
+		indices.clear();
+
 		for (int i = 0; i <= nx; i++) {
 			for (int j = 0; j <= ny; j++) {
-				VertexData vertex;
-				_data.positions.push_back(glm::vec3{ -1.0f + i * dx, -1.0f + j * dy, 0.0f });
-				_data.normals.push_back(glm::vec3{ 0.f, 0.f, 1.0f });
-				_data.colors.push_back(glm::vec4{ 1.f, 1.f, 1.f, 1.f });
+				Vertex v;
+				v.Position = glm::vec3{ -1.0f + i * dx, 0.0f ,-1.0f + j * dy };
+				v.Normal = glm::vec3{ 0.f, 1.f, 0.0f };
+				vertices.push_back(v);
 			}
 		}
+		print_vec(vertices[vertices.size() - 1].Position);
+		print_vec(vertices[0].Position);
 
-		_indices.clear();
+
+		indices.clear();
 		for (int i = 0; i < nx; i++) {
 			for (int j = 0; j < ny; j++) {
 
@@ -42,83 +54,103 @@ public:
 				const int J = 1;
 				const int I = ny + 1;
 
-				_indices.push_back(idx);
-				_indices.push_back(idx + I);
-				_indices.push_back(idx + J);
+				indices.push_back(idx);
+				indices.push_back(idx + I);
+				indices.push_back(idx + J);
 
-				_indices.push_back(idx + I);
-				_indices.push_back(idx + I + J);
-				_indices.push_back(idx + J);
+				indices.push_back(idx + I);
+				indices.push_back(idx + I + J);
+				indices.push_back(idx + J);
 			}
 		}
-
-	}
-
-	void CreatMesh() 
-	{
-
+		bindBuffers();
 	}
 
 	void loadProfile(WaterWavelets::ProfileBuffer const& profileBuffer) 
 	{
+		// 创建一个纹理对象
+		GLuint textureID;
+		glGenTextures(1, &textureID);
+		glBindTexture(GL_TEXTURE_1D, textureID);
+
+		// 设置纹理参数
+		glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+		// 将数据绑定到纹理
+		glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA, profileBuffer.m_data.size(), 0, GL_RGBA, GL_FLOAT, profileBuffer.m_data.data());
+
+		// 解绑纹理
+		glBindTexture(GL_TEXTURE_1D, 0);
 
 	}
 
-	void bindBuffers(std::vector<VertexData> const& data)
+	void bindBuffers()
 	{
+		// create buffers/arrays
 		glGenVertexArrays(1, &VAO);
 		glGenBuffers(1, &VBO);
-
-		glBindBuffer(GL_ARRAY_BUFFER, VBO);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(_data.), vertices, GL_STATIC_DRAW);
+		glGenBuffers(1, &EBO);
 
 		glBindVertexArray(VAO);
+		// load data into vertex buffers
+		glBindBuffer(GL_ARRAY_BUFFER, VBO);
+		// A great thing about structs is that their memory layout is sequential for all its items.
+		// The effect is that we can simply pass a pointer to the struct and it translates perfectly to a glm::vec3/2 array which
+		// again translates to 3/2 floats which translates to a byte array.
+		glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), &vertices[0], GL_STATIC_DRAW);
 
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void*)0);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), &indices[0], GL_STATIC_DRAW);
+
+		// set the vertex attribute pointers
+		// vertex Positions
 		glEnableVertexAttribArray(0);
-
-		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void*)(3 * sizeof(float)));
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
+		// vertex normals
 		glEnableVertexAttribArray(1);
-
-		glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void*)(3 * sizeof(float)));
-		glEnableVertexAttribArray(2);
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Normal));
 	}
 
 	void draw() 
 	{
-
+		// draw mesh
+		glBindVertexArray(VAO);
+		glDrawElements(GL_TRIANGLES, static_cast<unsigned int>(indices.size()), GL_UNSIGNED_INT, 0);
+		glBindVertexArray(0);
 	}
 
-	void recomputeNormals(VertexData& data)
+	void recomputeNormals()
 	{
-		for (auto& d : data.normals) {
-			d = glm::vec3{ 0.f, 0.f, 0.f };
-		}
+		//for (auto& d : vertices) {
+		//	d = glm::vec3{ 0.f, 0.f, 0.f };
+		//}
 
-		for (size_t i = 0; i < _indices.size();) {
+		//for (size_t i = 0; i < _indices.size();) {
 
-			auto id1 = _indices[i++];
-			auto id2 = _indices[i++];
-			auto id3 = _indices[i++];
+		//	auto id1 = _indices[i++];
+		//	auto id2 = _indices[i++];
+		//	auto id3 = _indices[i++];
 
-			auto v1 = data.positions[id1];
-			auto v2 = data.positions[id2];
-			auto v3 = data.positions[id3];
+		//	auto v1 = _data.positions[id1];
+		//	auto v2 = _data.positions[id2];
+		//	auto v3 = _data.positions[id3];
 
-			// This does weighted area based on triangle area
-			auto n = cross((v2 - v1), (v3 - v1));
+		//	// This does weighted area based on triangle area
+		//	auto n = cross((v2 - v1), (v3 - v1));
 
-			data.normals[id1] += n;
-			data.normals[id2] += n;
-			data.normals[id3] += n;
-		}
+		//	_data.normals[id1] += n;
+		//	_data.normals[id2] += n;
+		//	_data.normals[id3] += n;
+		//}
 
-		for (auto& d : data.normals)
-			d = glm::normalize(d);
+		//for (auto& d : _data.normals)
+		//	d = glm::normalize(d);
 	}
 
 	template <class Fun> void setVertices(Fun fun) {
-		std::vector<VertexData> newData = _data;
+		std::vector<Vertex> newData = vertices;
 
 		for (size_t i = 0; i < newData.size(); i++) {
 			fun(i, newData[i]);
@@ -128,9 +160,11 @@ public:
 	}
 
 private:
-	GLuint VAO, VBO;
+	// mesh Data
+	std::vector<Vertex>       vertices;
+	std::vector<unsigned int> indices;
 
-
-	VertexData _data;
-	std::vector<unsigned int> _indices;
+	unsigned int VAO;
+	// render data 
+	unsigned int VBO, EBO;
 };
