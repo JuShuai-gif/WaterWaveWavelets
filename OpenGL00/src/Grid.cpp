@@ -32,6 +32,4 @@ namespace WaterWavelets
 	{
 		return m_dimensions[dim];
 	}
-
-
 }

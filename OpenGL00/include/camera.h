@@ -75,9 +75,9 @@ public:
             Position += Right * velocity;
 
         if (direction == UP)
-            Position += UP * velocity;
+            Position += Up * velocity;
         if (direction == DOWN)
-            Position -= UP * velocity;
+            Position -= Up * velocity;
     }
 
     void ProcessMouseMovement(float xoffset, float yoffset, GLboolean constrainPitch = true)

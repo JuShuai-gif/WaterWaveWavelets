@@ -8,6 +8,7 @@
 #include <iostream>
 
 namespace WaterWavelets {
+    // 可以得到非负数的余数结果  对于处理循环或周期性问题非常有用
     constexpr int pos_modulo(int n, int d) { return (n % d + d) % d; }
 
     constexpr Real tau = 6.28318530718; // https://tauday.com/tau-manifesto
@@ -83,9 +84,16 @@ namespace WaterWavelets {
         WaveGrid(Settings s) : m_spectrum(10), m_enviroment(s.size) {
 
             // 目前m_amplitude是一个n_x * n_x * n_theta * n_zeta的Array数组
+            //std::cout << "s.n_x: " << s.n_x << "s.n_x: " << s.n_x << "s.n_theta: " << s.n_theta << "s.zeta: " << s.n_zeta << std::endl;
+            
+            // s.n_x:100      s.n_x:100      s.n_theta:8      s.n_zeta:1
+            // 最终它的大小为：100 * 100 * 8 * 1
             m_amplitude.resize(s.n_x, s.n_x, s.n_theta, s.n_zeta);
+            // s.n_x:100      s.n_x:100      s.n_theta:8      s.n_zeta:1
+            // 最终它的大小为：100 * 100 * 8 * 1
             m_newAmplitude.resize(s.n_x, s.n_x, s.n_theta, s.n_zeta);
-
+            
+            // 
             Real zeta_min = m_spectrum.minZeta();   // -5.05889
             Real zeta_max = m_spectrum.maxZeta();   // 3.32193
 
@@ -96,14 +104,15 @@ namespace WaterWavelets {
             通过计算步长（m_dx）和步长的倒数（m_idx），可以获得在每个维度上进行离散化计算时的间隔大小，
             以及方便进行从网格索引到实际坐标的转换。这些值可能在后续的波格点计算、插值或其他计算中被使用。
             */
+            // (最大值 - 最小值) / 该维总数 = 平均步长
             for (int i = 0; i < 4; i++) {
                 m_dx[i] = (m_xmax[i] - m_xmin[i]) / m_amplitude.dimension(i);
+                std::cout << m_dx[i] << std::endl;
                 m_idx[i] = 1.0 / m_dx[i];
-
             }
 
             m_time = s.initial_time;
-
+            // 轮廓缓冲只有一个，因为s.n_zeta = 1
             m_profileBuffers.resize(s.n_zeta);
             // 计算波群速度
             precomputeGroupSpeeds();
@@ -143,10 +152,10 @@ namespace WaterWavelets {
                 Real  zeta = idxToPos(izeta, Zeta);
                 auto& profile = m_profileBuffers[izeta];
 
-                int  DIR_NUM = gridDim(Theta);
-                int  N = 4 * DIR_NUM;
+                int  NUM = gridDim(Theta);
+                int  N = 4 * NUM;
                 Real da = 1.0 / N;
-                Real dx = DIR_NUM * tau / N;
+                Real dx = NUM * tau / N;
                 for (Real a = 0; a < 1; a += da) {
 
                     Real angle = a * tau;
@@ -189,6 +198,7 @@ namespace WaterWavelets {
         */
         auto extendedGrid() const
         {
+
             return [this](int ix, int iy, int itheta, int izeta) {
                 // 环绕角度
                 itheta = pos_modulo(itheta, gridDim(Theta));
@@ -328,23 +338,22 @@ namespace WaterWavelets {
         /*
         预成型平流步骤
         dt 一步的时间
-
-
         */
+        
         void advectionStep(Real dt) {
             // 线性插值幅度
             // 返回的是插值后的振幅值
             auto amplitude = interpolatedAmplitude();
-
+            int sum = 0;
 #pragma omp parallel for collapse(2)
             for (int ix = 0; ix < gridDim(X); ++ix) {
                 for (int iy = 0; iy < gridDim(Y); ++iy) {
 
                     Vec2 pos = nodePosition(ix, iy);
-                    // std::cout << "pos[0]: " << pos[0] << "    pos[1]: " << pos[1] << std::endl;
+                    
                     // update only points in the domain
                     if (m_enviroment.inDomain(pos)) {
-                        //std::cout << "在域中" << std::endl;
+                        sum++;
                         for (int itheta = 0; itheta < gridDim(Theta); itheta++) {
                             for (int izeta = 0; izeta < gridDim(Zeta); izeta++) {
 
@@ -365,7 +374,7 @@ namespace WaterWavelets {
                     }
                 }
             }
-
+            std::cout <<"总共多少在域中：" << sum << std::endl;
             std::swap(m_newAmplitude, m_amplitude);
         }
         /*
@@ -435,17 +444,27 @@ namespace WaterWavelets {
         基本计算当前选择的波谱的 预期群速度
         */
         void precomputeGroupSpeeds() {
+            // 根据zeta的长度来规定groupSpeeds的个数
             m_groupSpeeds.resize(gridDim(Zeta));
-            std::cout << gridDim(Zeta) << std::endl;
+            // 
             for (int izeta = 0; izeta < gridDim(Zeta); izeta++) {
 
                 Real zeta_min = idxToPos(izeta, Zeta) - 0.5 * dx(Zeta);
+                //std::cout << "izeta: " << izeta << std::endl;
+                //std::cout << "Zeta: " << Zeta << std::endl;
+                //std::cout << " 0.5 * dx(Zeta): " << 0.5 * dx(Zeta) << std::endl;
+                //std::cout << "zeta_min: " << zeta_min << std::endl;
+
                 Real zeta_max = idxToPos(izeta, Zeta) + 0.5 * dx(Zeta);
 
                 auto result = integrate(100, zeta_min, zeta_max, [&](Real zeta) -> Vec2 {
+                    // 计算波长 
                     Real waveLength = pow(2, zeta);
+                    // 计算波数
                     Real waveNumber = tau / waveLength;
+                    // 计算波浪的相速度 cg
                     Real cg = 0.5 * sqrt(9.81 / waveNumber);
+                    // 计算波浪密度
                     Real density = m_spectrum(zeta);
                     return { cg * density, density };
                     });
@@ -496,6 +515,9 @@ namespace WaterWavelets {
 
     public:
         Real idxToPos(int idx, int dim) const {
+            // m_xmin: 指定维度上的最小位置
+            // idx + 0.5: 为了将索引位置转换为对应位置的中心点
+            // m_dx[dim]: 步长 
             return m_xmin[dim] + (idx + 0.5) * m_dx[dim];
         }
         Vec4 idxToPos(Idx idx) const {
@@ -520,6 +542,7 @@ namespace WaterWavelets {
              posToIdx(pos4[Theta], Theta), posToIdx(pos4[Zeta], Zeta) };
         }
 
+        // 索引转坐标
         Vec2 nodePosition(int ix, int iy) const {
             return Vec2{ idxToPos(ix, 0), idxToPos(iy, 1) };
         }
@@ -567,16 +590,18 @@ namespace WaterWavelets {
         }
 
     public:
-        // 网格
+        // 存放两个网格大小的振幅值
         Grid     m_amplitude, m_newAmplitude;
+        // 频谱
         Spectrum m_spectrum;
 
+        // 存放轮廓缓冲   其实它就一个
         std::vector<ProfileBuffer> m_profileBuffers;
 
-        std::array<Real, 4> m_xmin;
-        std::array<Real, 4> m_xmax;
-        std::array<Real, 4> m_dx;
-        std::array<Real, 4> m_idx;
+        std::array<Real, 4> m_xmin;     // -50   -50   0    -5.05889
+        std::array<Real, 4> m_xmax;     // 50   50   6.28319    3.32193
+        std::array<Real, 4> m_dx;       // 1    1   0.785398    8.38082
+        std::array<Real, 4> m_idx;      // m_dx的导数
 
         std::vector<Real> m_groupSpeeds;
 

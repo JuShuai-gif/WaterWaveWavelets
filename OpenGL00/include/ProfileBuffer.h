@@ -27,13 +27,19 @@ namespace WaterWavelets
 			float zeta_max,int resolution = 4096,int periodicity = 2,
 			int integration_nodes = 100) 
 		{
-			m_data.resize(resolution);
-			m_period = periodicity * pow(2, zeta_max);
+			m_data.resize(resolution);//离散化计算精度，默认4096个点
+			m_period = periodicity * pow(2, zeta_max);//periodicity：频率，控制水波周期性
+			/*
+			针对每个点，都会进行计算该点的数据
+			*/
 #pragma omp parallel for
 			for (int i = 0; i < resolution; ++i)
 			{
+				// 2*pi
 				constexpr float tau = 6.28318530718;
+				// 计算当前位置i对应的实际位置"P"  计算水波相位
 				float p = (i * m_period) / resolution;
+				// 计算好的数据存在m_data中
 				m_data[i] = integrate(integration_nodes, zeta_min, zeta_max, [&](float zeta)
 					{
 				float waveLength = pow(2,zeta);
@@ -105,6 +111,6 @@ namespace WaterWavelets
 		// 周期
 		float m_period;
 		// 数据
-		std::vector<std::array<float, 4>> m_data;
+		std::vector<std::array<float, 4>> m_data; // 它其实就是包含了四个分量的数组
 	};
 }

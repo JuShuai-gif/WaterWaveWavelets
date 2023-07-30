@@ -12,40 +12,46 @@
 #include "DirectionNumber.h"
 #include "Utils.h"
 
+
+
 struct Vertex {
 	// position
-	glm::vec3 Position;
-	// normal
-	glm::vec3 Normal;
-
-
+	glm::vec3 position;
+	//glm::vec3 normal;
+	float p_index;
 };
-
 
 class PlaneMesh
 {
 public:
-	
 	PlaneMesh(int nx,int ny) {
-		std::vector<glm::vec3> pos;
 		float dx = 2.0f / nx;
 		float dy = 2.0f / ny;
 
 		vertices.clear();
 		indices.clear();
-
+		int in = 0;
 		for (int i = 0; i <= nx; i++) {
 			for (int j = 0; j <= ny; j++) {
 				Vertex v;
-				v.Position = glm::vec3{ -1.0f + i * dx, 0.0f ,-1.0f + j * dy };
-				v.Normal = glm::vec3{ 0.f, 1.f, 0.0f };
+				v.position = glm::vec3{ -1.0f + i * dx,-1.0f + j * dy ,0.0f };
+				//v.p_index = in;
+				v.p_index = float(in/484.0f);
+				//std::cout << "in / 120: " << v.p_index << std::endl;
+				in++;
+				for (size_t k = 0; k < 4; ++k) {
+					
+					glm::vec4 vv(0, 0, 1, 0);
+					amplitudeData.push_back(vv);
+				}
 				vertices.push_back(v);
 			}
 		}
-		print_vec(vertices[vertices.size() - 1].Position);
-		print_vec(vertices[0].Position);
-
-
+		TexTureWidth = amplitudeData.size();
+		//std::cout << "in: " << in << std::endl;
+		//std::cout << "总共有多少个顶点：" << vertices.size() << std::endl;
+		//std::cout << "顶点：" << vertices.size() * 16 << std::endl;
+		//std::cout << "总共有多少个幅度值：" << amplitudeData.size() << std::endl;
 		indices.clear();
 		for (int i = 0; i < nx; i++) {
 			for (int j = 0; j < ny; j++) {
@@ -69,9 +75,8 @@ public:
 	void loadProfile(WaterWavelets::ProfileBuffer const& profileBuffer) 
 	{
 		// 创建一个纹理对象
-		GLuint textureID;
-		glGenTextures(1, &textureID);
-		glBindTexture(GL_TEXTURE_1D, textureID);
+		glGenTextures(1, &profileBuffer_TexID);
+		glBindTexture(GL_TEXTURE_1D, profileBuffer_TexID);
 
 		// 设置纹理参数
 		glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -82,6 +87,49 @@ public:
 		glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA, profileBuffer.m_data.size(), 0, GL_RGBA, GL_FLOAT, profileBuffer.m_data.data());
 
 		// 解绑纹理
+		glBindTexture(GL_TEXTURE_1D, 0);
+
+
+		// 将数据复制到目标内存中
+		std::vector<float> flatData(amplitudeData.size() * 4); // 创建用于存储浮点数的目标容器
+		memcpy(flatData.data(), amplitudeData.data(), amplitudeData.size() * sizeof(glm::vec4));
+
+		glGenTextures(1, &amplitude_TexID);
+		glBindTexture(GL_TEXTURE_1D, amplitude_TexID);
+
+		// 设置纹理的缩小和放大过滤方式
+		glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+		// 设置纹理的环绕方式（这里使用 GL_CLAMP_TO_EDGE 来防止边界重复）
+		glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+
+		// 将 std::vector<glm::vec4> 的数据上传到纹理中
+		glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA32F, flatData.size(), 0, GL_RGBA, GL_FLOAT, flatData.data());
+
+		// 解绑纹理对象（可选，视情况而定）
+		glBindTexture(GL_TEXTURE_1D, 0);
+	}
+
+	void testTex() {
+		// 将数据复制到目标内存中
+		std::vector<float> flatData(amplitudeData.size() * 4); // 创建用于存储浮点数的目标容器
+		memcpy(flatData.data(), amplitudeData.data(), amplitudeData.size() * sizeof(glm::vec4));
+
+		glGenTextures(1, &amplitude_TexID);
+		glBindTexture(GL_TEXTURE_1D, amplitude_TexID);
+
+		// 设置纹理的缩小和放大过滤方式
+		glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+		// 设置纹理的环绕方式（这里使用 GL_CLAMP_TO_EDGE 来防止边界重复）
+		glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+
+		// 将 std::vector<glm::vec4> 的数据上传到纹理中
+		glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA32F, flatData.size(), 0, GL_RGBA, GL_FLOAT, flatData.data());
+
+		// 解绑纹理对象（可选，视情况而定）
 		glBindTexture(GL_TEXTURE_1D, 0);
 
 	}
@@ -108,9 +156,10 @@ public:
 		// vertex Positions
 		glEnableVertexAttribArray(0);
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
-		// vertex normals
+
 		glEnableVertexAttribArray(1);
-		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Normal));
+		glVertexAttribPointer(1, 1, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, p_index));
+		std::cout << "sizeof(Vertex): " << sizeof(Vertex) << "offsetof(Vertex, id): " << offsetof(Vertex, p_index) << std::endl;
 	}
 
 	void draw() 
@@ -159,10 +208,16 @@ public:
 		bindBuffers(newData);
 	}
 
-private:
+public:
 	// mesh Data
 	std::vector<Vertex>       vertices;
 	std::vector<unsigned int> indices;
+
+	std::vector<glm::vec4> amplitudeData;
+	int TexTureWidth;
+
+	GLuint profileBuffer_TexID;
+	GLuint amplitude_TexID;
 
 	unsigned int VAO;
 	// render data 

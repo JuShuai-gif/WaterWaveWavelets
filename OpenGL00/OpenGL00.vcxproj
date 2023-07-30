@@ -156,7 +156,7 @@
     <ClCompile Include="src\glad.c" />
     <ClCompile Include="src\Grid.cpp" />
     <ClCompile Include="src\Spectrum.cpp" />
-    <ClCompile Include="src\test.cpp" />
+    <ClCompile Include="src\test0.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="imgui\imconfig.h" />
@@ -611,6 +611,8 @@
     <None Include="Linking\include\glm\gtx\vector_angle.inl" />
     <None Include="Linking\include\glm\gtx\vector_query.inl" />
     <None Include="Linking\include\glm\gtx\wrap.inl" />
+    <None Include="Shaders\test.fs" />
+    <None Include="Shaders\test.vs" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

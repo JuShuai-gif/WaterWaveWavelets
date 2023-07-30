@@ -14,32 +14,7 @@
 
 #include <iostream>
 
-#include "../include/WaterSurfaceMesh.h"
-#include "../include/WaveGrid.h"
-#include "../include/Plane.h"
-
-using namespace WaterWavelets;
-
-auto settings = []() {
-    auto s = WaveGrid::Settings{};
-
-    s.size = 50;
-    s.min_zeta = log2(0.03);
-    s.max_zeta = log2(10);
-
-    s.n_x = 100;
-    s.n_theta = DIR_NUM;
-    s.n_zeta = 1;
-
-    s.initial_time = 100;
-    return s;
-}();
-
-int visGridResolution = 100;
-float amplitudeMult = 4.0f;
-bool update_screen_grid = true;
-float logdt = -0.9f;
-int directionToShow = -1;
+#include "../include/PlaneMesh.h"
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
@@ -86,6 +61,8 @@ int main()
 
     glEnable(GL_DEPTH_TEST);
 
+    Shader lightingShader("Shaders/test.vs", "Shaders/test.fs");
+
     glfwMakeContextCurrent(window);
     glfwSwapInterval(1); // Enable vsync
     IMGUI_CHECKVERSION();
@@ -96,18 +73,16 @@ int main()
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init("#version 330");
 
-    /**************************************************/
+    PlaneMesh plane(10, 10);
 
-    /**************************************************/
-
-    WaveGrid _waveGrid(settings);
-    Plane _plane(100, 100);
-    WaterSurfaceMesh _water_surface(10, 10);
-
-    Shader lightingShader("Shaders/test.vs", "Shaders/test.fs");
-
-    //lightingShader.use();
-    //lightingShader.setInt("textureData", 0);
+    // 生成一维贴图
+    plane.testTex();
+    
+    // 绘制网格
+    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    
+    lightingShader.use();
+    lightingShader.setInt("texture1", plane.amplitude_TexID);
 
     while (!glfwWindowShouldClose(window))
     {
@@ -115,31 +90,19 @@ int main()
 
         glClearColor(0.3f, 0.4f, 0.5f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        
-        //plane.draw();
-        //GLuint texID = _water_surface.loadProfile(_waveGrid.m_profileBuffers[0]);
-        //_waveGrid.timeStep(_waveGrid.cflTimeStep() * pow(10, logdt), update_screen_grid);
 
-        // 顶点着色器属性
-        //glActiveTexture(GL_TEXTURE0);
-        //glBindTexture(GL_TEXTURE_1D, texID);
-        //lightingShader.setFloat("profilePeriod", _waveGrid.m_profileBuffers[0].m_period);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_1D, plane.amplitude_TexID);
+
         glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
         glm::mat4 view = camera.GetViewMatrix();
         lightingShader.setMat4("projection", projection);
         lightingShader.setMat4("view", view);
+
         glm::mat4 model = glm::mat4(1.0f);
         lightingShader.setMat4("model", model);
-        //lightingShader.setFloat("time", 0);
-        //lightingShader.setVec3("light", glm::vec3(15.0f, 15.0f, 30.0f));
-        //glm::mat3 normalMat = glm::mat3(1.0f);
-        //lightingShader.setMat3("normalMatrix", normalMat);
-        
-        // 片段着色器属性
-        //lightingShader.setVec4("ambientColor", glm::vec4(0.3f, 0.4f, 0.5f, 1.0f));
-        //lightingShader.setVec4("color", glm::vec4(0.3f, 0.4f, 0.5f, 1.0f));
-        
-        _water_surface.draw();
+        //lightingShader.setInt("TexTureWidth", plane.TexTureWidth);
+        plane.draw();
 
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
