@@ -15,6 +15,30 @@
 #include <iostream>
 
 #include "../include/PlaneMesh.h"
+#include "../include/WaveGrid.h"
+
+using namespace WaterWavelets;
+
+auto settings = []() {
+    auto s = WaveGrid::Settings{};
+
+    s.size = 50;
+    s.min_zeta = log2(0.03);
+    s.max_zeta = log2(10);
+
+    s.n_x = 100;
+    s.n_theta = DIR_NUM;
+    s.n_zeta = 1;
+
+    s.initial_time = 100;
+    return s;
+}();
+
+int visGridResolution = 100;
+float amplitudeMult = 4.0f;
+bool update_screen_grid = true;
+float logdt = -0.9f;
+int directionToShow = -1;
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
@@ -72,27 +96,39 @@ int main()
 
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init("#version 330");
-
+    WaveGrid _waveGrid(settings);
     PlaneMesh plane(10, 10);
 
     // 生成一维贴图
-    plane.testTex();
+    plane.testTex(_waveGrid.m_profileBuffers[0]);
     
     // 绘制网格
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     
-    lightingShader.use();
-    lightingShader.setInt("texture1", plane.amplitude_TexID);
+    
+    //lightingShader.setInt("texture1", plane.amplitude_TexID);
 
+  
+    
     while (!glfwWindowShouldClose(window))
     {
         processInput(window);
 
         glClearColor(0.3f, 0.4f, 0.5f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        // 纹理0
+        glActiveTexture(GL_TEXTURE0);  
+        
+        glBindTexture(GL_TEXTURE_1D, plane.texture);
+        // 纹理1
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_1D, plane.texture1);
 
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_1D, plane.amplitude_TexID);
+        lightingShader.use();
+        // 千万注意，这里是从0开始的，不要设置为 plane.texture
+        lightingShader.setInt("textureData", 0);
+        lightingShader.setInt("amplitudeData", 1);
+
 
         glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
         glm::mat4 view = camera.GetViewMatrix();

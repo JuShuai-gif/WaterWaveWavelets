@@ -184,6 +184,7 @@
     <ClInclude Include="include\shader.h" />
     <ClInclude Include="include\SimulationLoop.h" />
     <ClInclude Include="include\Spectrum.h" />
+    <ClInclude Include="include\stb_image.h" />
     <ClInclude Include="include\Utils.h" />
     <ClInclude Include="include\ValueTraits.h" />
     <ClInclude Include="include\WaveGrid.h" />
@@ -613,6 +614,8 @@
     <None Include="Linking\include\glm\gtx\wrap.inl" />
     <None Include="Shaders\test.fs" />
     <None Include="Shaders\test.vs" />
+    <None Include="Shaders\texture.fs" />
+    <None Include="Shaders\texture.vs" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

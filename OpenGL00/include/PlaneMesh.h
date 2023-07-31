@@ -12,13 +12,12 @@
 #include "DirectionNumber.h"
 #include "Utils.h"
 
-
-
 struct Vertex {
 	// position
 	glm::vec3 position;
 	//glm::vec3 normal;
-	float p_index;
+	glm::vec4 index;
+	//float p_index;
 };
 
 class PlaneMesh
@@ -36,12 +35,14 @@ public:
 				Vertex v;
 				v.position = glm::vec3{ -1.0f + i * dx,-1.0f + j * dy ,0.0f };
 				//v.p_index = in;
-				v.p_index = float(in/484.0f);
+				//v.p_index = float(in/484.0f);
 				//std::cout << "in / 120: " << v.p_index << std::endl;
-				in++;
+				//in++;
+				float ff = 1 / 484.0f;
 				for (size_t k = 0; k < 4; ++k) {
-					
-					glm::vec4 vv(0, 0, 1, 0);
+					v.index[k] = float(in / 484.0f);
+					in++;
+					glm::vec4 vv(0.21f, 0.45f, 0.76f, 0);
 					amplitudeData.push_back(vv);
 				}
 				vertices.push_back(v);
@@ -111,13 +112,18 @@ public:
 		glBindTexture(GL_TEXTURE_1D, 0);
 	}
 
-	void testTex() {
-		// 将数据复制到目标内存中
-		std::vector<float> flatData(amplitudeData.size() * 4); // 创建用于存储浮点数的目标容器
-		memcpy(flatData.data(), amplitudeData.data(), amplitudeData.size() * sizeof(glm::vec4));
-
-		glGenTextures(1, &amplitude_TexID);
-		glBindTexture(GL_TEXTURE_1D, amplitude_TexID);
+	void testTex(WaterWavelets::ProfileBuffer const& profileBuffer)
+{
+		//std::vector<float> data = {
+		//			0.3f, 0.1f, 0.2f, 1.0f,
+		//			0.4f, 0.4f, 0.6f, 1.0f,
+		//			0.12f, 0.15f, 0.18f, 1.0f,
+		//			0.78f, 0.46f, 0.47f, 1.0f
+		//};
+		std::vector<float> profileData(profileBuffer.m_data.size() * 4); // 创建用于存储浮点数的目标容器
+		memcpy(profileData.data(), profileBuffer.m_data.data(), profileBuffer.m_data.size() * sizeof(float) * 4);
+		glGenTextures(1, &texture);
+		glBindTexture(GL_TEXTURE_1D, texture);
 
 		// 设置纹理的缩小和放大过滤方式
 		glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -126,8 +132,28 @@ public:
 		// 设置纹理的环绕方式（这里使用 GL_CLAMP_TO_EDGE 来防止边界重复）
 		glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 
-		// 将 std::vector<glm::vec4> 的数据上传到纹理中
-		glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA32F, flatData.size(), 0, GL_RGBA, GL_FLOAT, flatData.data());
+		// 将 std::vector<float> 的数据上传到纹理中
+		glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA32F, profileBuffer.m_data.size() / 4, 0, GL_RGBA, GL_FLOAT, profileBuffer.m_data.data());
+
+		// 解绑纹理对象（可选，视情况而定）
+		glBindTexture(GL_TEXTURE_1D, 0);
+		
+		
+		//// 将数据复制到目标内存中
+		std::vector<float> flatData(amplitudeData.size() * 4); // 创建用于存储浮点数的目标容器
+		memcpy(flatData.data(), amplitudeData.data(), amplitudeData.size() * sizeof(glm::vec4));
+		glGenTextures(1, &texture1);
+		glBindTexture(GL_TEXTURE_1D, texture1);
+
+		// 设置纹理的缩小和放大过滤方式
+		glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+		// 设置纹理的环绕方式（这里使用 GL_CLAMP_TO_EDGE 来防止边界重复）
+		glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+
+		// 将 std::vector<float> 的数据上传到纹理中
+		glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA32F, flatData.size() / 4, 0, GL_RGBA, GL_FLOAT, flatData.data());
 
 		// 解绑纹理对象（可选，视情况而定）
 		glBindTexture(GL_TEXTURE_1D, 0);
@@ -158,8 +184,8 @@ public:
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
 
 		glEnableVertexAttribArray(1);
-		glVertexAttribPointer(1, 1, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, p_index));
-		std::cout << "sizeof(Vertex): " << sizeof(Vertex) << "offsetof(Vertex, id): " << offsetof(Vertex, p_index) << std::endl;
+		glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, index));
+		std::cout << "sizeof(Vertex): " << sizeof(Vertex) << "offsetof(Vertex, id): " << offsetof(Vertex, index) << std::endl;
 	}
 
 	void draw() 
@@ -218,6 +244,9 @@ public:
 
 	GLuint profileBuffer_TexID;
 	GLuint amplitude_TexID;
+
+	unsigned int texture;
+	unsigned int texture1;
 
 	unsigned int VAO;
 	// render data 

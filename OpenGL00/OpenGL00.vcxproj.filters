@@ -998,6 +998,9 @@
     <ClInclude Include="include\PlaneMesh.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="include\stb_image.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Linking\include\glm\detail\func_common.inl">
@@ -1410,5 +1413,7 @@
     </None>
     <None Include="Shaders\test.vs" />
     <None Include="Shaders\test.fs" />
+    <None Include="Shaders\texture.vs" />
+    <None Include="Shaders\texture.fs" />
   </ItemGroup>
 </Project>
